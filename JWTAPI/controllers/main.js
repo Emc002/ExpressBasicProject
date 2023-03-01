@@ -1,28 +1,20 @@
-const CustomAPIError = require('../errors/custom-error')
+const {BadRequestError} = require('../errors')
 const jwt = require('jsonwebtoken')
-const login = async (req,res) => {
-  const {username, password} = req.body
-  if(!username || !password){
-    throw new CustomAPIError('please provide email and password', 400)
+const login = async (req, res) => {
+  const { username, password } = req.body
+  if (!username || !password) {
+    throw new BadRequestError('please provide email and password')
   }
   const id = new Date().getDate()
-  const token = jwt.sign({id,username},process.env.JWT_SECRET,{expiresIn:'30d'})
-  res.status(200).json({msg:"success", data:{username, password},token})
+  const token = jwt.sign({ id, username }, process.env.JWT_SECRET, { expiresIn: '30d' })
+  res.status(200).json({ msg: "success", data: { username, password }, token })
 }
 
-const dashboard = async (req,res) => {
-  const authHeader = req.headers.authorization;
-  if(!authHeader || !authHeader.startsWith('Bearer ')){
-    throw new CustomAPIError('Not Authorized Request', 401)
-  }
-  const token = authHeader.split(' ')[1];
-  try{
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    const luckyNumber = Math.floor(Math.random()*100)
-    res.status(200).json({msg:`Hello, ${decoded.username}`, secret:`Your Lucky number ${luckyNumber}`})
-  }catch(err){
-    throw new CustomAPIError('Not Authorized Request', 401)
-  }
+const dashboard = async (req, res) => {
+
+  const luckyNumber = Math.floor(Math.random() * 100)
+  res.status(200).json({ msg: `Hello, ${req.user.username}`, secret: `Your Lucky number ${luckyNumber}` })
+
 }
 
 module.exports = {
